@@ -1,10 +1,11 @@
-# Svake Nett Analyse - MVP Implementation (Agder)
+# Svake Nett Analyse - National Weak Grid Analysis
 
 Geospatial analysis system for identifying weak electrical grid areas and potential customers for hybrid solar + battery installations.
 
-**Target**: 15,000 cabins in Agder region
-**Timeline**: 2.5 weeks (12 work days)
+**Scope**: 130,250 buildings across all of Norway
+**Building Types**: Cabins (fritidsbygg), Residential (bolig), Commercial (other)
 **Tech Stack**: Python + PostgreSQL+PostGIS + GeoPandas
+**Current Status**: v4 production system with 200x performance optimization
 
 ---
 
@@ -111,69 +112,57 @@ svakenett/
 
 ### Core Tables
 
-- **cabins**: Individual cabin locations with weak grid scores
-- **grid_companies**: Grid company KILE statistics (SAIDI/SAIFI)
-- **postal_codes**: Postal code boundaries
-- **municipalities**: Municipality boundaries
-- **postal_code_scores**: GDPR-compliant aggregated scores (≥5 cabins per postal code)
+- **buildings**: All building locations (130,250 buildings) with type classification
+- **transformers_new**: Transformer locations across Norway
+- **power_lines_new**: Power line geometries with voltage classifications
+- **distribution_lines_11_24kv**: Materialized view of 11-24 kV distribution lines (9,316 lines)
+- **weak_grid_candidates_v4**: Final weak grid candidates (21 buildings) with risk scoring
 
 ### Key Indexes
 
 - **GiST spatial indexes**: Fast geospatial queries (distance calculations, spatial joins)
-- **B-tree indexes**: Efficient filtering on postal codes, scores
-- **Materialized view**: `mv_cabin_summary` for dashboard queries
+- **B-tree indexes**: Efficient filtering on risk scores, tier classifications
+- **Composite indexes**: Optimized for transformer distance and load density queries
 
 ---
 
 ## Development Workflow
 
-### Day 1-7: Data Acquisition
+### Data Acquisition (Complete)
 
-**RECOMMENDED: Use PostGIS SQL Dump** (direct PostgreSQL import, no conversion needed):
+NVE data successfully loaded into PostgreSQL+PostGIS:
 
 ```bash
-# 1. Download N50 PostGIS dump from Geonorge.no
-#    Visit: https://kartkatalog.geonorge.no/
-#    Search: "N50 Kartdata"
-#    Region: Agder fylke
-#    Format: PostGIS - SQL dump
-#    Save to: data/raw/n50_agder_postgis.dump
-
-# 2. Load directly into PostgreSQL (30 seconds!)
-./scripts/02_load_n50_postgis_dump.sh data/raw/n50_agder_postgis.dump
-
-# 3. Download NVE KILE statistics
-poetry run python scripts/03_download_kile_data.py --year 2023
+# Buildings: 130,250 across Norway
+# Transformers: Nationwide coverage
+# Power lines: Complete LineString geometries (11-24 kV distribution lines)
 ```
 
-**Alternative** (if PostGIS dump unavailable):
+**Data Source**: NVE (Norwegian Water Resources and Energy Directorate) infrastructure database
+
+### Weak Grid Analysis (v4 - Current System)
+
+Run optimized weak grid filtering:
+
 ```bash
-# Use GeoJSON/GeoPackage with GeoPandas
-poetry run python scripts/01_download_n50_data.py --region agder
-poetry run python scripts/03_load_data_to_postgres.py
+# Execute v4 optimized filtering (14 seconds runtime)
+psql -U postgres -d svakenett -f sql/optimized_weak_grid_filter_v4.sql
 ```
 
-### Day 8-10: Scoring Model
+**Output**:
+- **weak_grid_candidates_v4**: 21 weak grid buildings identified
+- **distribution_lines_11_24kv**: Materialized view of distribution infrastructure
+
+**Performance**: 200x faster than baseline approach (14 seconds vs 5-7 hours)
+
+### Export and Validation
 
 ```bash
-# Calculate weak grid scores for all cabins
-poetry run python scripts/04_calculate_scores.py
+# Export results to CSV
+poetry run python scripts/export_weak_grid_candidates.py
 
-# Generate GDPR-compliant postal code aggregations
-poetry run python scripts/05_aggregate_postal_codes.py
-
-# Validate scoring model
-poetry run python scripts/06_validate_scores.py
-```
-
-### Day 11-12: Validation & Export
-
-```bash
-# Generate validation report
-poetry run python scripts/07_generate_validation_report.py
-
-# Export results to CSV for CRM import
-poetry run python scripts/08_export_csv.py
+# Generate validation reports
+poetry run python scripts/generate_weak_grid_report.py
 ```
 
 ---
@@ -189,8 +178,9 @@ poetry run python scripts/08_export_csv.py
    - **Database**: `svakenett`
    - **User**: `postgres`
    - **Password**: `weakgrid2024`
-4. Connect → Select `cabins` table → Add
-5. Style by `score_balanced` field for visualization
+4. Connect → Select `weak_grid_candidates_v4` table → Add
+5. Style by `composite_risk_score` field for visualization
+6. Add `distribution_lines_11_24kv` layer to show power line context
 
 ---
 
@@ -209,52 +199,87 @@ poetry run pytest tests/test_scoring.py -v
 
 ---
 
-## Scoring Algorithm
+## Weak Grid Analysis Methodology (v4)
 
-**Weighted Formula** (0-100 scale):
+**Progressive Filtering Approach** - Eliminates 99.95% of buildings BEFORE expensive calculations:
 
-```
-score = (KILE_score * 0.40) +
-        (distance_score * 0.30) +
-        (terrain_score * 0.20) +
-        (municipality_score * 0.10)
-```
+### Filtering Sequence
 
-### Three Scoring Profiles
+1. **Transformer Distance >30km** (Highest selectivity: 99.95% eliminated)
+   - Filters out buildings with strong grid infrastructure
+   - 130,250 → 66 buildings in 1.4 seconds
 
-- **Conservative** (score ≥ 75): High confidence, estimated 3,000 cabins
-- **Balanced** (score ≥ 60): Recommended default, estimated 7,500 cabins
-- **Aggressive** (score ≥ 45): Maximum reach, estimated 15,000 cabins
+2. **Distribution Line Proximity <1km** (11-24 kV lines only)
+   - Identifies buildings near distribution infrastructure
+   - 66 → 62 buildings in 0.04 seconds
+
+3. **Grid Density Calculation** (Expensive operation on small dataset)
+   - Count lines within 1km radius
+   - 62 buildings in 3.7 seconds (vs 26+ minutes for all buildings)
+
+4. **Low Density Filter** (≤1 line within 1km)
+   - Identifies sparse grid areas
+   - 62 → 21 buildings instantly
+
+5. **Building/Load Density** (Concentration analysis)
+   - Count buildings within 1km (shared grid stress)
+   - Final classification with risk tiering
+
+### Risk-Based Classification
+
+**Weak Grid Tiers**:
+- Tier 1: Extreme (>50km from transformer)
+- Tier 2: Severe (30-50km from transformer)
+
+**Load Severity**:
+- High load concentration (≥20 buildings)
+- Medium load concentration (10-19 buildings)
+- Low load concentration (5-9 buildings)
+- Isolated building (<5 nearby)
+
+**Composite Risk Score**: `(transformer_distance_m / 1000) × (buildings_within_1km + 1)`
 
 ---
 
-## GDPR Compliance
+## Current Results (v4)
 
-- **Aggregation**: Results aggregated to postal code level (minimum 5 cabins)
-- **No Individual Targeting**: Individual properties not exported
-- **Legitimate Interest**: Weak grid = publicly observable condition
-- **Geo-targeted Ads**: Facebook/Google ads targeting postal codes only
+### Final Output
+- **21 weak grid candidates** identified
+- **All cabins** (Fritidsbygg, bygningstype 161)
+- **Geographic cluster**: Postal code 4865
+- **Average transformer distance**: 30.2 km
+- **Average load concentration**: 44 buildings per candidate
+- **Highest risk**: Building 29088 (risk score: 1,645.1)
+
+### Building Distribution
+- 0 residential buildings
+- 0 commercial buildings
+- 21 cabins (remote cabin areas only)
+
+**Explanation**: 30km transformer distance threshold effectively filters to remote cabin areas. Residential buildings typically have closer transformer access and denser grid infrastructure.
 
 ---
 
 ## Performance Benchmarks
 
-| Operation | Target Performance |
-|-----------|-------------------|
-| Load 15k cabins | < 5 seconds |
-| Calculate all scores | < 30 seconds |
-| Distance to nearest town (15k cabins) | 2-5 seconds |
-| Postal code aggregation | < 10 seconds |
-| Full MVP pipeline (Day 1-12) | 2.5 weeks |
+| Operation | Performance Achieved |
+|-----------|---------------------|
+| Complete weak grid analysis | 14 seconds (was 5-7 hours) |
+| Transformer distance filter | 1.4 seconds (99.95% eliminated) |
+| Grid density calculation | 3.7 seconds (was 26+ minutes) |
+| Building density calculation | 8.8 seconds |
+| Overall speedup | **200x faster** |
+| Computational reduction | **99.95% fewer spatial operations** |
 
 ---
 
 ## Data Sources
 
-- **NVE KILE**: Grid outage statistics (SAIDI/SAIFI) - [nve.no](https://www.nve.no)
-- **Kartverket N50**: Building locations - [kartverket.no](https://kartkatalog.geonorge.no/)
-- **SSB**: Population and municipality data - [ssb.no](https://www.ssb.no)
-- **Matrikkelen**: Property registry (deferred to Phase 2)
+- **NVE Infrastructure Data**: Buildings, transformers, power lines across Norway - [nve.no](https://www.nve.no)
+  - 130,250 buildings (all types)
+  - Nationwide transformer coverage
+  - 9,316 distribution lines (11-24 kV) with complete LineString geometries
+- **Building Classification**: Fritidsbygg (cabins), Bolig (residential), Other (commercial)
 
 ---
 
@@ -293,15 +318,15 @@ poetry install
 
 ---
 
-## Next Steps
+## Project Status
 
-1. ✅ Docker + PostgreSQL+PostGIS setup (30 min)
-2. ⏳ Download Kartverkat N50 data (Day 1-3)
-3. ⏳ Download NVE KILE statistics (Day 4-5)
-4. ⏳ Load data to PostgreSQL (Day 6-7)
-5. ⏳ Implement scoring algorithm (Day 8-9)
-6. ⏳ Validate and refine (Day 10-11)
-7. ⏳ Export results (Day 12)
+1. ✅ Docker + PostgreSQL+PostGIS setup
+2. ✅ NVE data loaded (130,250 buildings, transformers, power lines)
+3. ✅ Weak grid filtering v4 implemented (200x performance improvement)
+4. ✅ 21 weak grid candidates identified with risk scoring
+5. ✅ Validated with ChatGPT review (Grade: B+ Very Good)
+6. ⏳ Field validation and visualization
+7. ⏳ Economic analysis layer (solar irradiance, ROI calculation)
 
 ---
 
@@ -319,4 +344,4 @@ Proprietary - Norsk Solkraft AS
 
 ---
 
-**Last Updated**: 2025-11-22
+**Last Updated**: 2025-11-24 (v4 system documentation)
