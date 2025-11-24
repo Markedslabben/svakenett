@@ -1,0 +1,75 @@
+[tool.poetry]
+name = "svakenett-analyse"
+version = "0.1.0"
+description = "Weak grid customer identification for hybrid solar installations - Agder MVP"
+authors = ["Norsk Solkraft <klaus@norsksolkraft.no>"]
+license = "Proprietary"
+readme = "README.md"
+packages = [{include = "svakenett", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+# Core data processing
+pandas = "^2.1.0"
+numpy = "^1.26.0"
+
+# Geospatial processing
+geopandas = "^0.14.0"
+shapely = "^2.0.0"
+pyproj = "^3.6.0"
+rtree = "^1.1.0"
+
+# Database
+sqlalchemy = "^2.0.0"
+psycopg2-binary = "^2.9.0"
+geoalchemy2 = "^0.14.0"
+
+# Data visualization
+folium = "^0.15.0"
+plotly = "^5.18.0"
+matplotlib = "^3.8.0"
+
+# Data validation
+pandera = "^0.17.0"
+pydantic = "^2.5.0"
+
+# Utilities
+python-dotenv = "^1.0.0"
+requests = "^2.31.0"
+tqdm = "^4.66.0"
+loguru = "^0.7.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+black = "^23.12.0"
+ruff = "^0.1.0"
+mypy = "^1.7.0"
+ipython = "^8.18.0"
+jupyter = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+addopts = "-v --cov=src/svakenett --cov-report=term-missing"

@@ -1,0 +1,216 @@
+# ============================================================================
+# Svakenett Project .gitignore
+# Weak Grid Analysis for Norwegian Solar Power Potential
+# ============================================================================
+
+# ============================================================================
+# Database Files - NEVER commit databases
+# ============================================================================
+*.db
+*.sqlite
+*.sqlite3
+*.duckdb
+*.db-shm
+*.db-wal
+*.sql.gz
+*.dump
+*.backup
+*.bak
+/data/databases/
+/backups/database/
+
+# PostgreSQL
+*.psql
+pg_dump_*
+*.pgdata
+
+# ============================================================================
+# Large Data Files - CSV, Parquet, GeoJSON
+# ============================================================================
+# CSV files (often large datasets)
+*.csv
+!**/example.csv
+!**/sample.csv
+!**/template.csv
+
+# Parquet files
+*.parquet
+*.pq
+
+# Large GeoJSON files
+*.geojson
+*.json.gz
+/data/raw/*.geojson
+/data/processed/*.geojson
+
+# ============================================================================
+# HTML Visualization Files - Can be very large (GB)
+# ============================================================================
+*.html
+!**/templates/*.html
+!**/examples/*.html
+/data/processed/**/*.html
+/visualizations/*.html
+
+# ============================================================================
+# Compressed Archives
+# ============================================================================
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.gz
+
+# ============================================================================
+# Python
+# ============================================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# ============================================================================
+# Operating System
+# ============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+
+# ============================================================================
+# Temporary Files
+# ============================================================================
+*.tmp
+*.temp
+*.log
+*.swp
+*.swo
+*~
+.~lock.*
+
+# Logs
+logs/*.log
+*.log.*
+/logs/nve_load_*.log
+
+# ============================================================================
+# Environment Variables
+# ============================================================================
+.env
+.env.local
+.env.*.local
+*.env
+
+# ============================================================================
+# Data Directories (Large Files)
+# ============================================================================
+/data/raw/
+/data/processed/
+/data/interim/
+/data/external/
+/data/databases/
+
+# Allow certain data structure files
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/interim/.gitkeep
+
+# ============================================================================
+# Backup Files
+# ============================================================================
+/backup_*/
+/backups/
+*.backup
+*_backup/
+*_old/
+
+# ============================================================================
+# Documentation Build Outputs
+# ============================================================================
+docs/_build/
+docs/.doctrees/
+site/
+
+# ============================================================================
+# Project Specific
+# ============================================================================
+# NVE raw downloads
+/downloads/
+/nve_data/
+
+# Processed building datasets
+unified_buildings_*/
+weak_grid_map*.html
+
+# Test outputs
+/test_outputs/
+/debug/
+
+# ============================================================================
+# Git and Version Control
+# ============================================================================
+*.orig
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
+*.REMOTE.*
+*_BACKUP_*
+*_BASE_*
+*_LOCAL_*
+*_REMOTE_*
+
+# ============================================================================
+# Allow Important Files
+# ============================================================================
+# Keep documentation
+!README.md
+!CHANGELOG.md
+!LICENSE
+!.gitignore
+
+# Keep schema files
+!**/schema.sql
+!**/migrations/*.sql
+
+# Keep configuration examples
+!**/*example*
+!**/*template*
+!**/*sample*
+
+# Keep small reference data
+!**/reference/*.csv
+!**/lookup/*.csv
