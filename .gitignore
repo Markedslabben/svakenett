@@ -214,3 +214,9 @@ weak_grid_map*.html
 # Keep small reference data
 !**/reference/*.csv
 !**/lookup/*.csv
+
+# Large postal codes file (139 MB - exceeds GitHub limit)
+data/postal_codes/postal-codes.json
+
+# Large postal codes file (139 MB - exceeds GitHub limit)
+data/postal_codes/postal-codes.json
