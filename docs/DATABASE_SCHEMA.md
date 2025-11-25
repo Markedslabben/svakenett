@@ -11,7 +11,7 @@
 The Svakenett v4 database uses PostgreSQL with PostGIS for spatial analysis to identify weak grid buildings through progressive filtering rather than traditional scoring.
 
 **Key Tables**:
-- **buildings** (130,250 rows) - All building types nationwide
+- **buildings** (130,250 rows) - All building types Agder region
 - **power_lines_new** (9,316 rows) - 11-24 kV distribution lines
 - **transformers_new** (106 rows) - Transformer stations
 - **weak_grid_candidates_v4** (21 rows) - Final filtered candidates

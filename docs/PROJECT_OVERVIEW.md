@@ -13,19 +13,19 @@
 Norwegian property owners (cabins, residential, commercial) in remote areas face unreliable electrical grid service. Grid upgrades cost 200,000-800,000 NOK and take 6-24 months. Hybrid solar + battery installations provide an alternative solution at lower cost (100,000-300,000 NOK) with 2-6 week deployment.
 
 ### Complication
-Norsk Solkraft needs systematic methodology to identify which buildings have weak electrical grids and would benefit most from hybrid installations. Manual prospecting is inefficient - identifying high-value customers requires analyzing electrical infrastructure and geographic factors across all of Norway.
+Norsk Solkraft needs systematic methodology to identify which buildings have weak electrical grids and would benefit most from hybrid installations. Manual prospecting is inefficient - identifying high-value customers requires analyzing electrical infrastructure and geographic factors across Agder region.
 
 ### Question
-How can Norsk Solkraft systematically identify weak grid properties from 130,250+ buildings nationwide using objective infrastructure data?
+How can Norsk Solkraft systematically identify weak grid properties from 130,250+ buildings Agder region using objective infrastructure data?
 
 ### Answer (HOVEDBUDSKAP)
-Svakenett v4 is an optimized geospatial filtering system that identifies weak grid buildings through progressive filtering: buildings >30km from transformers, near distribution lines (11-24 kV), with sparse grid infrastructure (≤1 line within 1km), and high load concentration. The system achieves 200x performance improvement (14 seconds vs 5-7 hours) through computational optimization, analyzing all 130,250 buildings nationwide to identify 21 high-confidence weak grid candidates.
+Svakenett v4 is an optimized geospatial filtering system that identifies weak grid buildings through progressive filtering: buildings >30km from transformers, near distribution lines (11-24 kV), with sparse grid infrastructure (≤1 line within 1km), and high load concentration. The system achieves 200x performance improvement (14 seconds vs 5-7 hours) through computational optimization, analyzing all 130,250 buildings Agder region to identify 21 high-confidence weak grid candidates.
 
 ---
 
 ## HOVEDBUDSKAP (Main Message)
 
-Svakenett v4 solves weak grid identification through efficient computational filtering rather than traditional scoring. The system uses progressive elimination: transformer distance (>30km) eliminates 99.95% of buildings immediately, followed by distribution line proximity (<1km), grid density calculation (line count), low density filtering (≤1 line), building density analysis, and risk-based tiering. This approach completes nationwide analysis in 14 seconds, identifying 21 weak grid candidates (all cabins in postal code 4865) with clear risk scores based on transformer distance and load concentration.
+Svakenett v4 solves weak grid identification through efficient computational filtering rather than traditional scoring. The system uses progressive elimination: transformer distance (>30km) eliminates 99.95% of buildings immediately, followed by distribution line proximity (<1km), grid density calculation (line count), low density filtering (≤1 line), building density analysis, and risk-based tiering. This approach completes Agder region analysis in 14 seconds, identifying 21 weak grid candidates (all cabins in postal code 4865) with clear risk scores based on transformer distance and load concentration.
 
 ---
 
@@ -81,7 +81,7 @@ The v4 optimization revolutionized performance through computational efficiency:
 
 ### Chapter 2: Technical Architecture
 
-**Message**: PostgreSQL+PostGIS with KNN operators and materialized views delivers production-grade performance for nationwide geospatial analysis.
+**Message**: PostgreSQL+PostGIS with KNN operators and materialized views delivers production-grade performance for Agder region geospatial analysis.
 
 **Core Technology Stack**:
 
@@ -118,12 +118,12 @@ The v4 optimization revolutionized performance through computational efficiency:
 
 ### Chapter 3: Data Sources and Coverage
 
-**Message**: Complete nationwide building coverage (130,250 buildings) with comprehensive power infrastructure data enables systematic weak grid identification.
+**Message**: Complete Agder region building coverage (130,250 buildings) with comprehensive power infrastructure data enables systematic weak grid identification.
 
 **Building Data**:
 - Total buildings analyzed: 130,250
 - Building types: Cabins (fritidsbygg), Residential (bolig), Commercial (other)
-- Geographic scope: All of Norway
+- Geographic scope: Agder region
 - Data quality: PostGIS geometries with spatial accuracy
 
 **Power Infrastructure Data**:
@@ -178,7 +178,7 @@ The v4 optimization revolutionized performance through computational efficiency:
 **Data Quality Observations**:
 - Single postal code clustering requires validation (transformer data completeness check)
 - No candidates identified in other regions - may indicate:
-  - Strong transformer coverage nationwide
+  - Strong transformer coverage Agder region
   - Data quality issues in specific regions
   - Effectiveness of 30km threshold
 
@@ -452,12 +452,12 @@ WHERE postal_code = '4865';
 - Coverage: Regional
 
 **v4 Optimized Approach**:
-- Scope: 130,250 buildings (nationwide)
+- Scope: 130,250 buildings (Agder region)
 - Methodology: Progressive filtering with risk-based tiering
 - Filtering criteria: Transformer distance, line proximity, grid density, load concentration
 - Output: 21 high-confidence candidates with risk scores
 - Runtime: 14 seconds (200x faster)
-- Coverage: National (100%)
+- Coverage: Agder region (100%)
 
 **Key Differences**:
 | Aspect | Old Approach | v4 Approach | Improvement |
@@ -473,12 +473,12 @@ WHERE postal_code = '4865';
 
 ## Document Summary
 
-Svakenett v4 is a production-ready geospatial filtering system that identifies weak grid properties through computationally efficient progressive filtering. The system analyzes 130,250 buildings nationwide in 14 seconds (200x improvement), identifying 21 high-confidence weak grid candidates through systematic elimination based on transformer distance, distribution line proximity, grid density, and load concentration.
+Svakenett v4 is a production-ready geospatial filtering system that identifies weak grid properties through computationally efficient progressive filtering. The system analyzes 130,250 buildings Agder region in 14 seconds (200x improvement), identifying 21 high-confidence weak grid candidates through systematic elimination based on transformer distance, distribution line proximity, grid density, and load concentration.
 
 **Key Achievements**:
 - 200x performance improvement (14s vs 5-7 hours)
 - 99.95% computational efficiency (eliminate before calculating)
-- 100% nationwide coverage (130,250 buildings)
+- 100% Agder region coverage (130,250 buildings)
 - 21 high-confidence candidates identified
 - Simplified methodology (removed KILE, power poles, complex scoring)
 

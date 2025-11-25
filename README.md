@@ -2,7 +2,7 @@
 
 Geospatial analysis system for identifying weak electrical grid areas and potential customers for hybrid solar + battery installations.
 
-**Scope**: 130,250 buildings across all of Norway
+**Scope**: 130,250 buildings across Agder region
 **Building Types**: Cabins (fritidsbygg), Residential (bolig), Commercial (other)
 **Tech Stack**: Python + PostgreSQL+PostGIS + GeoPandas
 **Current Status**: v4 production system with 200x performance optimization
@@ -113,7 +113,7 @@ svakenett/
 ### Core Tables
 
 - **buildings**: All building locations (130,250 buildings) with type classification
-- **transformers_new**: Transformer locations across Norway
+- **transformers_new**: Transformer locations in Agder region
 - **power_lines_new**: Power line geometries with voltage classifications
 - **distribution_lines_11_24kv**: Materialized view of 11-24 kV distribution lines (9,316 lines)
 - **weak_grid_candidates_v4**: Final weak grid candidates (21 buildings) with risk scoring
@@ -133,7 +133,7 @@ svakenett/
 NVE data successfully loaded into PostgreSQL+PostGIS:
 
 ```bash
-# Buildings: 130,250 across Norway
+# Buildings: 130,250 in Agder region
 # Transformers: Nationwide coverage
 # Power lines: Complete LineString geometries (11-24 kV distribution lines)
 ```
@@ -275,7 +275,7 @@ poetry run pytest tests/test_scoring.py -v
 
 ## Data Sources
 
-- **NVE Infrastructure Data**: Buildings, transformers, power lines across Norway - [nve.no](https://www.nve.no)
+- **NVE Infrastructure Data**: Buildings, transformers, power lines in Agder region - [nve.no](https://www.nve.no)
   - 130,250 buildings (all types)
   - Nationwide transformer coverage
   - 9,316 distribution lines (11-24 kV) with complete LineString geometries
